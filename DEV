@@ -1,0 +1,12 @@
+
+```
+go mod init github.com/kuizhiqing/trainingjob-operator
+
+kubebuilder init --domain org
+
+kubebuilder create api --group kubeflow --version v1beta1 --kind TrainingJob
+
+make manifests
+
+make
+```
