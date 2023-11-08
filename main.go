@@ -52,11 +52,13 @@ func main() {
 	var metricsAddr string
 	var enableLeaderElection bool
 	var probeAddr string
+	var enabledSchemes string
 	flag.StringVar(&metricsAddr, "metrics-bind-address", ":8080", "The address the metric endpoint binds to.")
 	flag.StringVar(&probeAddr, "health-probe-bind-address", ":8081", "The address the probe endpoint binds to.")
 	flag.BoolVar(&enableLeaderElection, "leader-elect", false,
 		"Enable leader election for controller manager. "+
 			"Enabling this will ensure there is only one active controller manager.")
+	flag.StringVar(&enabledSchemes, "enable-schemes", "", "Enable scheme(s) as --enable-scheme=tfjob,pytorchjob, case insensitive.")
 	opts := zap.Options{
 		Development: true,
 	}
@@ -90,9 +92,10 @@ func main() {
 	}
 
 	if err = (&controllers.TrainingJobReconciler{
-		Client: mgr.GetClient(),
-		Scheme: mgr.GetScheme(),
-	}).SetupWithManager(mgr); err != nil {
+		Client:   mgr.GetClient(),
+		Scheme:   mgr.GetScheme(),
+		Recorder: mgr.GetEventRecorderFor("trainingjob-controller"),
+	}).SetupWithManager(mgr, enabledSchemes); err != nil {
 		setupLog.Error(err, "unable to create controller", "controller", "TrainingJob")
 		os.Exit(1)
 	}
