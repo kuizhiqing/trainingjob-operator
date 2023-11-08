@@ -17,29 +17,67 @@ limitations under the License.
 package v1beta1
 
 import (
+	kubeflowv1 "github.com/kubeflow/training-operator/pkg/apis/kubeflow.org/v1"
 	metav1 "k8s.io/apimachinery/pkg/apis/meta/v1"
 )
 
-// EDIT THIS FILE!  THIS IS SCAFFOLDING FOR YOU TO OWN!
-// NOTE: json tags are required.  Any new fields you add must have json tags for the fields to be serialized.
+const KIND = "TrainingJob"
+
+type JobState string
+
+const (
+	Created    JobState = "Created"
+	Restarting JobState = "Restarting"
+	Pending    JobState = "Pending"
+	Running    JobState = "Running"
+	Succeeded  JobState = "Succeeded"
+	Failed     JobState = "Failed"
+	Unknown    JobState = "Unknown"
+)
 
 // TrainingJobSpec defines the desired state of TrainingJob
 type TrainingJobSpec struct {
-	// INSERT ADDITIONAL SPEC FIELDS - desired state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	// Type indicates the training framework or workload type
+	Type string `json:"type,omitempty"`
 
-	// Foo is an example field of TrainingJob. Edit trainingjob_types.go to remove/update
-	Foo string `json:"foo,omitempty"`
+	// RunPolicy encapsulates various runtime policies of the distributed training
+	// job, for example how to clean up resources and how long the job can stay
+	// active.
+	//+kubebuilder:validation:Optional
+	RunPolicy kubeflowv1.RunPolicy `json:"runPolicy"`
+
+	// ElasticPolicy aim to define global elastic configuration
+	ElasticPolicy *kubeflowv1.ElasticPolicy `json:"elasticPolicy,omitempty"`
+
+	// A map of ReplicaType (type) to ReplicaSpec (value).
+	// For example,
+	//   {
+	//     "Master": PyTorchReplicaSpec,
+	//     "Worker": PyTorchReplicaSpec,
+	//   }
+	ReplicaSpecs map[kubeflowv1.ReplicaType]*kubeflowv1.ReplicaSpec `json:"replicaSpecs"`
+
+	// OptionalMap store user defined data.
+	OptionalMap map[string]string `json:"optionalMap,omitempty"`
 }
 
 // TrainingJobStatus defines the observed state of TrainingJob
 type TrainingJobStatus struct {
-	// INSERT ADDITIONAL STATUS FIELD - define observed state of cluster
-	// Important: Run "make" to regenerate code after modifying this file
+	kubeflowv1.JobStatus `json:"status,omitempty"`
+
+	// State is a simple, high-level summary of where the Job is in its lifecycle
+	// +optional
+	State JobState `json:"state,omitempty"`
 }
 
-//+kubebuilder:object:root=true
-//+kubebuilder:subresource:status
+// +genclient
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
+// +kubebuilder:object:root=true
+// +kubebuilder:subresource:status
+// +kubebuilder:resource:shortName=tjob
+// +kubebuilder:printcolumn:name="Type",type="string",JSONPath=`.spec.type`
+// +kubebuilder:printcolumn:name="Age",type="date",JSONPath=`.metadata.creationTimestamp`
+// +kubebuilder:printcolumn:name="State",type="string",JSONPath=`.status.state`
 
 // TrainingJob is the Schema for the trainingjobs API
 type TrainingJob struct {
@@ -51,6 +89,7 @@ type TrainingJob struct {
 }
 
 //+kubebuilder:object:root=true
+// +k8s:deepcopy-gen:interfaces=k8s.io/apimachinery/pkg/runtime.Object
 
 // TrainingJobList contains a list of TrainingJob
 type TrainingJobList struct {
