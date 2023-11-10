@@ -31,7 +31,8 @@ import (
 	"sigs.k8s.io/controller-runtime/pkg/healthz"
 	"sigs.k8s.io/controller-runtime/pkg/log/zap"
 
-	kubeflowv1beta1 "github.com/kuizhiqing/trainingjob-operator/api/v1beta1"
+	kubeflowv1 "github.com/kubeflow/training-operator/pkg/apis/kubeflow.org/v1"
+	tj "github.com/kuizhiqing/trainingjob-operator/api/v1beta1"
 	"github.com/kuizhiqing/trainingjob-operator/controllers"
 	//+kubebuilder:scaffold:imports
 )
@@ -44,7 +45,8 @@ var (
 func init() {
 	utilruntime.Must(clientgoscheme.AddToScheme(scheme))
 
-	utilruntime.Must(kubeflowv1beta1.AddToScheme(scheme))
+	utilruntime.Must(kubeflowv1.AddToScheme(scheme))
+	utilruntime.Must(tj.AddToScheme(scheme))
 	//+kubebuilder:scaffold:scheme
 }
 

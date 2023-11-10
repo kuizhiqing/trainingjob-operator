@@ -159,14 +159,15 @@ func (r *TrainingJobReconciler) SetupWithManager(mgr ctrl.Manager, enabledScheme
 
 	schemes := strings.Split(enabledSchemes, ",")
 	for k := range RegisteredSchemes {
-		if len(schemes) == 0 || contains(schemes, k) {
-			logr.Info("Setup", "enable", k)
+		if enabledSchemes == "" || contains(schemes, k) {
+			logr.Info("Setup", "enabled", k)
 			if err := mgr.GetFieldIndexer().
 				IndexField(context.Background(), RegisteredSchemes[k](), ctrlRefKey, indexerFunc); err != nil {
 				return err
 			}
 			builder = builder.Owns(RegisteredSchemes[k]())
 		} else {
+			logr.Info("Setup", "disabled", k)
 			delete(RegisteredSchemes, k)
 			delete(JobManagerBuilder, k)
 		}

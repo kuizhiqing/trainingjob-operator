@@ -4,7 +4,7 @@ metadata:
   name: tj-pytorch
 spec:
   type: pytorchjob
-  extra:
+  optionalMap:
     nprocPerNode: "2"
   runPolicy:
     cleanPodPolicy: Running
