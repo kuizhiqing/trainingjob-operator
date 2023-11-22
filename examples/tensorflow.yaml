@@ -1,0 +1,24 @@
+apiVersion: kubeflow.org/v1beta1
+kind: TrainingJob
+metadata:
+  name: tj-tf
+spec:
+  type: tfjob
+  optionalMap:
+    successPolicy: ""
+    enableDynamicWorker: "false"
+  runPolicy:
+    cleanPodPolicy: Running
+    ttlSecondsAfterFinished: 60
+  replicaSpecs:
+    Worker:
+      replicas: 2
+      restartPolicy: OnFailure
+      template:
+        spec:
+          containers:
+            - name: tensorflow
+              image: mirrors.tencent.com/joeshikui/tf-mnist-with-summaries:latest
+              command:
+                - "python"
+                - "/var/tf_mnist/mnist_with_summaries.py"
